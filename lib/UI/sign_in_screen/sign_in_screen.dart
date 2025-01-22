@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lanars_test_task/UI/users_list_screen/users_list_screen.dart';
+import 'package:lanars_test_task/UI/home_screen/home_screen.dart';
 
 import 'bloc/sign_in_bloc.dart';
 
@@ -22,8 +22,7 @@ class SignInScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        UsersListScreen(userData: state.userData),
+                    builder: (context) => HomeScreen(userData: state.userData),
                   ),
                 );
               });
