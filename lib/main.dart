@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'UI/sign_in_screen/bloc/sign_in_bloc.dart';
 import 'UI/sign_in_screen/sign_in_screen.dart';
 
 void main() {
@@ -15,9 +17,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: '/login',
       routes: {
-        '/login': (context) => SignInScreen(),
+        '/login': (context) => BlocProvider(
+            create: (context) => SignInBloc(), child: SignInScreen()),
       },
-      home: SignInScreen(),
     );
   }
 }

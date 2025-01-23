@@ -7,6 +7,10 @@ class EmailChanged extends SignInEvent {
   EmailChanged({required this.email});
 }
 
+class ResetEmailError extends SignInEvent {}
+
+class ResetPasswordError extends SignInEvent {}
+
 class PasswordChanged extends SignInEvent {
   final String password;
   PasswordChanged({required this.password});

@@ -27,6 +27,19 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     on<SignInSubmitted>((event, emit) async {
       emit(SignInLoading());
 
+      final isEmailValid = isValidEmail(event.email);
+      final isPasswordValid = isValidPassword(event.password);
+
+      if (!isEmailValid || !isPasswordValid) {
+        final error = (!isEmailValid && !isPasswordValid)
+            ? "Invalid email and password format"
+            : !isEmailValid
+                ? "Invalid email format"
+                : "Invalid password format";
+        emit(SignInFailure(error: error));
+        return;
+      }
+
       try {
         // Імітація затримки (запит)
         await Future.delayed(const Duration(seconds: 2));
@@ -38,6 +51,9 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         emit(SignInFailure(error: 'Something went wrong. Please try again.'));
       }
     });
+
+    on<ResetEmailError>((event, emit) => emit(EmailResetError()));
+    on<ResetPasswordError>((event, emit) => emit(PasswordResetError()));
   }
 
   final emailRegExp = RegExp(
