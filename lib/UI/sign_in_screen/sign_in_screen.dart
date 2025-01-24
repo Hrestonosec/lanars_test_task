@@ -1,9 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lanars_test_task/UI/home_screen/home_screen.dart';
+import 'package:lanars_test_task/app_router.gr.dart';
 
 import 'bloc/sign_in_bloc.dart';
 
+@RoutePage()
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -81,12 +83,7 @@ class _SignInScreenState extends State<SignInScreen> {
           if (state is SignInSuccess) {
             // Navigate to the HomeScreen if sign-in is successful
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(userData: state.userData),
-                ),
-              );
+              context.router.push(HomeRoute(userData: state.userData));
             });
           } else if (state is SignInFailure) {
             // Show an error message if sign-in failed
@@ -119,7 +116,9 @@ class _SignInScreenState extends State<SignInScreen> {
                       context.read<SignInBloc>().add(ResetEmailError());
                     },
                     // Disable input if loading or already signed in
-                    enabled: state is! SignInLoading || state is! SignInSuccess,
+                    enabled: state is SignInLoading || state is SignInSuccess
+                        ? false
+                        : true,
                     maxLength: 30,
                     decoration: InputDecoration(
                       labelText: 'Email',
@@ -139,7 +138,9 @@ class _SignInScreenState extends State<SignInScreen> {
                       context.read<SignInBloc>().add(ResetPasswordError());
                     },
                     // Disable input if loading or already signed in
-                    enabled: state is! SignInLoading || state is! SignInSuccess,
+                    enabled: state is SignInLoading || state is SignInSuccess
+                        ? false
+                        : true,
                     obscureText: true,
                     maxLength: 10,
                     decoration: InputDecoration(
