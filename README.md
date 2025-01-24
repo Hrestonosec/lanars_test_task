@@ -1,5 +1,5 @@
 # lanars_test_task
-
+My option was Option 1, but I accidentally did some tasks from Option 2 😅
 What was done:
 
 Complexity сlarification:
