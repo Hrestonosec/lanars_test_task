@@ -1,9 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lanars_test_task/UI/home_screen/bloc/home_bloc.dart';
+import 'package:lanars_test_task/UI/sign_in_screen/bloc/sign_in_bloc.dart';
+import 'package:lanars_test_task/app_router.gr.dart';
 
 import 'services/pexel_api_service.dart';
 
+@RoutePage()
 // HomeScreen widget that displays user info and photo list
 class HomeScreen extends StatelessWidget {
   final Map<String, dynamic>
@@ -35,8 +39,8 @@ class HomeScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context)
-                    .pushReplacementNamed('/login'); // Navigate to login screen
+                BlocProvider.of<SignInBloc>(context).add(ResetSignInState());
+                context.router.push(SignInRoute()); // Navigate to login screen
               },
               child: Text('Log Out'),
             ),

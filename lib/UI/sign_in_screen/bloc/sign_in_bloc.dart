@@ -66,6 +66,8 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     on<ResetEmailError>((event, emit) => emit(EmailResetError()));
 
     on<ResetPasswordError>((event, emit) => emit(PasswordResetError()));
+
+    on<ResetSignInState>((event, emit) => emit(SignInInitial()));
   }
 
   // Regular expression for validating email format
