@@ -5,7 +5,7 @@ import 'package:lanars_test_task/UI/home_screen/home_screen.dart';
 import 'bloc/sign_in_bloc.dart';
 
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({Key? key}) : super(key: key);
+  const SignInScreen({super.key});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -88,7 +88,6 @@ class _SignInScreenState extends State<SignInScreen> {
               SnackBar(
                   content: Text(
                 state.error,
-                style: TextStyle(color: Colors.red),
               )),
             );
           }
@@ -111,7 +110,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     onChanged: (_) {
                       context.read<SignInBloc>().add(ResetEmailError());
                     },
-                    enabled: state is! SignInLoading,
+                    enabled: state is! SignInLoading || state is! SignInSuccess,
                     maxLength: 30,
                     decoration: InputDecoration(
                       labelText: 'Email',
@@ -128,7 +127,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     onChanged: (_) {
                       context.read<SignInBloc>().add(ResetPasswordError());
                     },
-                    enabled: state is! SignInLoading,
+                    enabled: state is! SignInLoading || state is! SignInSuccess,
                     obscureText: true,
                     maxLength: 10,
                     decoration: InputDecoration(
@@ -141,19 +140,17 @@ class _SignInScreenState extends State<SignInScreen> {
                   padding: EdgeInsets.all(20),
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: state is SignInLoading
-                        ? null // Вимкнення кнопки, якщо йде завантаження
+                    onPressed: state is SignInLoading || state is SignInSuccess
+                        ? null // Блокуємо кнопку під час завантаження
                         : () {
                             if (emailController.text.isEmpty ||
                                 passwordController.text.isEmpty ||
                                 state is EmailInvalid ||
-                                state is PasswordInvalid ||
-                                state is SignInLoading) {
+                                state is PasswordInvalid) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
                                       'Будь ласка, заповніть коректно всі поля'),
-                                  backgroundColor: Colors.red,
                                 ),
                               );
                               return;
@@ -163,8 +160,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                   password: passwordController.text,
                                 ));
                           },
-                    child: state is SignInLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                    child: state is SignInLoading || state is SignInSuccess
+                        ? const CircularProgressIndicator()
                         : const Text('Log In'),
                   ),
                 ),
