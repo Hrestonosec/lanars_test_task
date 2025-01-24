@@ -17,6 +17,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final emailFocusNode = FocusNode();
   final passwordFocusNode = FocusNode();
 
+  // Initialize focus listeners
   @override
   void initState() {
     super.initState();
@@ -24,6 +25,7 @@ class _SignInScreenState extends State<SignInScreen> {
     passwordFocusNode.addListener(_onFocusChangePassword);
   }
 
+  // Dispose of controllers and focus nodes when the widget is disposed
   @override
   void dispose() {
     emailFocusNode.removeListener(_onFocusChangeEmail);
@@ -35,38 +37,40 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
+  // Called when the email field loses focus, triggering validation
   void _onFocusChangeEmail() {
     if (!emailFocusNode.hasFocus) {
-      // Перевірка валідації для email після втрати фокусу
       context.read<SignInBloc>().add(EmailChanged(email: emailController.text));
     }
   }
 
+  // Called when the password field loses focus, triggering validation
   void _onFocusChangePassword() {
     if (!passwordFocusNode.hasFocus) {
-      // Перевірка валідації для паролю після втрати фокусу
       context
           .read<SignInBloc>()
           .add(PasswordChanged(password: passwordController.text));
     }
   }
 
+  // Helper function to get the error text for the email field
   String? _getEmailError(SignInState state) {
     if (state is EmailInvalid) {
-      return 'Invalid email format';
+      return 'Invalid email format'; // Show error message for invalid email
     } else if (state is EmailResetError) {
-      return null;
+      return null; // No error when user editing email or password
     }
-    return null; // За замовчуванням без помилок
+    return null; // No error by default
   }
 
+  // Helper function to get the error text for the password field
   String? _getPasswordError(SignInState state) {
     if (state is PasswordInvalid) {
-      return 'Invalid password format';
+      return 'Invalid password format'; // Show error message for invalid password
     } else if (state is PasswordResetError) {
-      return null;
+      return null; // No error when user editing email or password
     }
-    return null; // За замовчуванням без помилок
+    return null; // No error by default
   }
 
   @override
@@ -75,6 +79,7 @@ class _SignInScreenState extends State<SignInScreen> {
       body: BlocConsumer<SignInBloc, SignInState>(
         listener: (context, state) {
           if (state is SignInSuccess) {
+            // Navigate to the HomeScreen if sign-in is successful
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.push(
                 context,
@@ -84,6 +89,7 @@ class _SignInScreenState extends State<SignInScreen> {
               );
             });
           } else if (state is SignInFailure) {
+            // Show an error message if sign-in failed
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text(
@@ -96,12 +102,14 @@ class _SignInScreenState extends State<SignInScreen> {
           return SingleChildScrollView(
             child: Column(
               children: [
+                // Title of the screen
                 Container(
                     padding: EdgeInsets.fromLTRB(20, 100, 20, 20),
                     child: const Text(
                       'Sign In',
                       style: TextStyle(fontSize: 30),
                     )),
+                // Email input field
                 Container(
                   padding: EdgeInsets.all(20),
                   child: TextField(
@@ -110,15 +118,18 @@ class _SignInScreenState extends State<SignInScreen> {
                     onChanged: (_) {
                       context.read<SignInBloc>().add(ResetEmailError());
                     },
+                    // Disable input if loading or already signed in
                     enabled: state is! SignInLoading || state is! SignInSuccess,
                     maxLength: 30,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(),
-                      errorText: _getEmailError(state),
+                      errorText:
+                          _getEmailError(state), // Show email error if present
                     ),
                   ),
                 ),
+                // Password input field
                 Container(
                   padding: EdgeInsets.all(20),
                   child: TextField(
@@ -127,22 +138,26 @@ class _SignInScreenState extends State<SignInScreen> {
                     onChanged: (_) {
                       context.read<SignInBloc>().add(ResetPasswordError());
                     },
+                    // Disable input if loading or already signed in
                     enabled: state is! SignInLoading || state is! SignInSuccess,
                     obscureText: true,
                     maxLength: 10,
                     decoration: InputDecoration(
                         labelText: 'Password',
                         border: OutlineInputBorder(),
-                        errorText: _getPasswordError(state)),
+                        errorText: _getPasswordError(
+                            state)), // Show password error if present
                   ),
                 ),
+                // Log in button
                 Container(
                   padding: EdgeInsets.all(20),
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: state is SignInLoading || state is SignInSuccess
-                        ? null // Блокуємо кнопку під час завантаження
+                        ? null // Disable button if loading or already signed in
                         : () {
+                            // Check if fields are empty or invalid before submitting
                             if (emailController.text.isEmpty ||
                                 passwordController.text.isEmpty ||
                                 state is EmailInvalid ||
@@ -150,18 +165,19 @@ class _SignInScreenState extends State<SignInScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                      'Будь ласка, заповніть коректно всі поля'),
+                                      'Please fill in all fields correctly.'),
                                 ),
                               );
                               return;
                             }
+                            // Submit sign-in event if all fields are valid
                             context.read<SignInBloc>().add(SignInSubmitted(
                                   email: emailController.text,
                                   password: passwordController.text,
                                 ));
                           },
                     child: state is SignInLoading || state is SignInSuccess
-                        ? const CircularProgressIndicator()
+                        ? const CircularProgressIndicator() // Show loading indicator while signing in
                         : const Text('Log In'),
                   ),
                 ),

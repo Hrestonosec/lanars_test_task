@@ -16,7 +16,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: lightTheme,
+      // Defines the initial route when the app starts
       initialRoute: '/login',
+      // Defines the routes for navigation within the app
       routes: {
         '/login': (context) => BlocProvider(
             create: (context) => SignInBloc(), child: SignInScreen()),

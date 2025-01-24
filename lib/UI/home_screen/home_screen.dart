@@ -4,12 +4,15 @@ import 'package:lanars_test_task/UI/home_screen/bloc/home_bloc.dart';
 
 import 'services/pexel_api_service.dart';
 
+// HomeScreen widget that displays user info and photo list
 class HomeScreen extends StatelessWidget {
-  final Map<String, dynamic> userData;
+  final Map<String, dynamic>
+      userData; // Holds user data passed from previous screen
   final TextEditingController _searchController = TextEditingController();
 
   HomeScreen({super.key, required this.userData});
 
+  // Logout function, shows a confirmation dialog
   void _logout(BuildContext context) {
     showDialog(
       context: context,
@@ -20,7 +23,7 @@ class HomeScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Закриває діалогове вікно
+                Navigator.of(context).pop();
               },
               child: Text(
                 'Cancel',
@@ -31,9 +34,9 @@ class HomeScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Закриває діалогове вікно
+                Navigator.of(context).pop();
                 Navigator.of(context)
-                    .pushReplacementNamed('/login'); // Виконує вихід
+                    .pushReplacementNamed('/login'); // Navigate to login screen
               },
               child: Text('Log Out'),
             ),
@@ -46,24 +49,29 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HomeBloc(PexelsApiService())..add(FetchPhotosEvent()),
+      create: (_) => HomeBloc(PexelsApiService())
+        ..add(FetchPhotosEvent()), // Initialize HomeBloc
       child: Scaffold(
         appBar: AppBar(
           leading: BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
+              // Back button for search mode
               if (state is HomeSearchingState) {
                 return IconButton(
                   icon: Icon(Icons.arrow_back),
                   onPressed: () {
-                    context.read<HomeBloc>().add(SearchCancelled());
+                    context
+                        .read<HomeBloc>()
+                        .add(SearchCancelled()); // Cancel search mode
                   },
                 );
               }
+              // Default menu button
               return Builder(
                 builder: (context) => IconButton(
                   icon: Icon(Icons.menu),
                   onPressed: () {
-                    Scaffold.of(context).openDrawer();
+                    Scaffold.of(context).openDrawer(); // Open drawer menu
                   },
                 ),
               );
@@ -71,6 +79,7 @@ class HomeScreen extends StatelessWidget {
           ),
           title: BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
+              // Show search bar in search mode
               if (state is HomeSearchingState) {
                 return TextField(
                   autofocus: true,
@@ -85,12 +94,16 @@ class HomeScreen extends StatelessWidget {
                       icon: Icon(Icons.clear),
                       onPressed: () {
                         context.read<HomeBloc>().add(SearchPhotosEvent(''));
-                        _searchController.clear();
+                        _searchController.clear(); // Clear search
                       },
                     ),
                   ),
                   onChanged: (value) {
-                    context.read<HomeBloc>().add(SearchPhotosEvent(value));
+                    if (value.length > 2 || value.isEmpty) {
+                      context
+                          .read<HomeBloc>()
+                          .add(SearchPhotosEvent(value)); // Trigger search
+                    }
                   },
                 );
               }
@@ -104,7 +117,9 @@ class HomeScreen extends StatelessWidget {
                   return IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () {
-                      context.read<HomeBloc>().add(ToggleSearchEvent());
+                      context
+                          .read<HomeBloc>()
+                          .add(ToggleSearchEvent()); // Toggle search mode
                     },
                   );
                 }
@@ -124,17 +139,17 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 30,
-                      backgroundImage:
-                          NetworkImage(userData['picture']['large']),
+                      backgroundImage: NetworkImage(
+                          userData['picture']['large']), // Display user avatar
                     ),
                     SizedBox(height: 10),
                     Text(
                       '${userData['name']['first']} ${userData['name']['last']}',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18), // Display user name
                     ),
                     Text(
                       userData['email'],
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14), // Display user email
                     ),
                   ],
                 ),
@@ -142,7 +157,7 @@ class HomeScreen extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.exit_to_app),
                 title: Text('Logout'),
-                onTap: () => _logout(context),
+                onTap: () => _logout(context), // Log out when tapped
               ),
             ],
           ),
@@ -150,11 +165,15 @@ class HomeScreen extends StatelessWidget {
         body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
             if (state is HomeLoadingState) {
-              return Center(child: CircularProgressIndicator());
+              return Center(
+                  child:
+                      CircularProgressIndicator()); // Show loading indicator while data is fetched
             } else if (state is HomeLoadedState) {
               return RefreshIndicator(
                 onRefresh: () async {
-                  context.read<HomeBloc>().add(FetchPhotosEvent());
+                  context
+                      .read<HomeBloc>()
+                      .add(FetchPhotosEvent()); // Refresh photos
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(right: 15),
@@ -169,19 +188,17 @@ class HomeScreen extends StatelessWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Назва групи (літера) з фіксованою шириною
                               Container(
-                                width: 30, // Ширина для літери
+                                width: 30,
                                 alignment: Alignment.topLeft,
                                 child: Text(
-                                  group.key, // Літера групи
+                                  group.key, // Display group letter
                                   style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w500,
                                       color: Color(0xFF0061A6)),
                                 ),
                               ),
-                              // Список фотографій у групі
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,16 +207,19 @@ class HomeScreen extends StatelessWidget {
                                       .map(
                                         (photo) => ListTile(
                                           contentPadding: EdgeInsets.all(10),
-                                          title: Text(photo.photographer),
-                                          subtitle: Text(photo.alt),
-                                          leading: Image.network(photo.url),
+                                          title: Text(photo
+                                              .photographer), // Display photographer name
+                                          subtitle: Text(photo
+                                              .alt), // Display photo description
+                                          leading: Image.network(
+                                              photo.url), // Display photo image
                                           shape: OutlineInputBorder(
                                             borderRadius:
                                                 const BorderRadius.all(
                                                     Radius.circular(10.0)),
                                             borderSide: BorderSide(
                                               color: Color(0xFF535F70),
-                                              width: 1.0, // Товщина обведення
+                                              width: 1.0,
                                             ),
                                           ),
                                         ),
@@ -217,12 +237,11 @@ class HomeScreen extends StatelessWidget {
               );
             } else if (state is HomeSearchingState) {
               if (state.searchedPhotos.isEmpty) {
-                // Якщо список порожній, відображаємо повідомлення
                 return Column(
                   children: [
                     Divider(
                       color: Colors.black,
-                      thickness: 1.0, // Товщина лінії
+                      thickness: 1.0,
                     ),
                     Center(
                       child: Padding(
@@ -237,12 +256,11 @@ class HomeScreen extends StatelessWidget {
                   ],
                 );
               } else {
-                // Якщо список не порожній, відображаємо його
                 return Column(
                   children: [
                     Divider(
                       color: Colors.black,
-                      thickness: 1.0, // Товщина лінії
+                      thickness: 1.0,
                     ),
                     Expanded(
                       child: ListView.builder(
@@ -254,15 +272,18 @@ class HomeScreen extends StatelessWidget {
                                 vertical: 4.0, horizontal: 20.0),
                             child: ListTile(
                               contentPadding: EdgeInsets.all(10),
-                              title: Text(photo.photographer),
-                              subtitle: Text(photo.alt),
-                              leading: Image.network(photo.url),
+                              title: Text(photo
+                                  .photographer), // Display photographer name
+                              subtitle:
+                                  Text(photo.alt), // Display photo description
+                              leading: Image.network(
+                                  photo.url), // Display photo image
                               shape: OutlineInputBorder(
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 borderSide: BorderSide(
                                   color: Color(0xFF535F70),
-                                  width: 1.0, // Товщина обведення
+                                  width: 1.0,
                                 ),
                               ),
                             ),
@@ -276,12 +297,13 @@ class HomeScreen extends StatelessWidget {
             } else if (state is HomeEmptyState) {
               return Center(
                 child: Text(
-                  'Жодних даних не було отримано',
+                  'No data was received',
                   style: TextStyle(fontSize: 18),
                 ),
               );
             } else if (state is HomeErrorState) {
-              return Center(child: Text('Error: ${state.error}'));
+              return Center(
+                  child: Text('Error: ${state.error}')); // Show error message
             }
             return Container();
           },
