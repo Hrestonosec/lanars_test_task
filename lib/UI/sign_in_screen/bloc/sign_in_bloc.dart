@@ -9,6 +9,8 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
 
   SignInBloc() : super(SignInInitial()) {
     on<EmailChanged>((event, emit) {
+      if (state is SignInLoading) return;
+
       if (isValidEmail(event.email)) {
         emit(EmailValid());
       } else {
@@ -17,6 +19,8 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     });
 
     on<PasswordChanged>((event, emit) {
+      if (state is SignInLoading) return;
+
       if (isValidPassword(event.password)) {
         emit(PasswordValid());
       } else {
@@ -25,11 +29,23 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     });
 
     on<SignInSubmitted>((event, emit) async {
+      final isEmailValid = isValidEmail(event.email);
+      final isPasswordValid = isValidPassword(event.password);
+
       emit(SignInLoading());
 
+      if (!isEmailValid || !isPasswordValid) {
+        final error = (!isEmailValid && !isPasswordValid)
+            ? "Invalid email and password format"
+            : !isEmailValid
+                ? "Invalid email format"
+                : "Invalid password format";
+        emit(SignInFailure(error: error));
+        return;
+      }
+
       try {
-        // Імітація затримки (запит)
-        await Future.delayed(const Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 1));
 
         final response = await dio.get('https://randomuser.me/api/');
         final userData = response.data['results'][0];
@@ -38,6 +54,9 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         emit(SignInFailure(error: 'Something went wrong. Please try again.'));
       }
     });
+
+    on<ResetEmailError>((event, emit) => emit(EmailResetError()));
+    on<ResetPasswordError>((event, emit) => emit(PasswordResetError()));
   }
 
   final emailRegExp = RegExp(

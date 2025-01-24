@@ -8,21 +8,26 @@ class HomeScreen extends StatelessWidget {
   final Map<String, dynamic> userData;
   final TextEditingController _searchController = TextEditingController();
 
-  HomeScreen({Key? key, required this.userData}) : super(key: key);
+  HomeScreen({super.key, required this.userData});
 
   void _logout(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Вихід з акаунта'),
-          content: Text('Ви впевнені, що хочете вийти з акаунта?'),
+          title: Text('Log out'),
+          content: Text('Are you sure you want to logout?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Закриває діалогове вікно
               },
-              child: Text('Скасувати'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Color(0xFF535F70),
+                ),
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -30,10 +35,7 @@ class HomeScreen extends StatelessWidget {
                 Navigator.of(context)
                     .pushReplacementNamed('/login'); // Виконує вихід
               },
-              child: Text(
-                'Вийти',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: Text('Log Out'),
             ),
           ],
         );
@@ -73,6 +75,9 @@ class HomeScreen extends StatelessWidget {
                 return TextField(
                   autofocus: true,
                   controller: _searchController,
+                  style: TextStyle(fontSize: 20),
+                  cursorHeight: 22,
+                  cursorWidth: 1,
                   decoration: InputDecoration(
                     hintText: 'Search...',
                     border: InputBorder.none,
@@ -89,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                   },
                 );
               }
-              return Text('Home Screen');
+              return Center(child: Text('Home Screen'));
             },
           ),
           actions: [
@@ -125,11 +130,11 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 10),
                     Text(
                       '${userData['name']['first']} ${userData['name']['last']}',
-                      style: TextStyle(color: Colors.black, fontSize: 18),
+                      style: TextStyle(fontSize: 18),
                     ),
                     Text(
                       userData['email'],
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      style: TextStyle(fontSize: 14),
                     ),
                   ],
                 ),
@@ -151,79 +156,128 @@ class HomeScreen extends StatelessWidget {
                 onRefresh: () async {
                   context.read<HomeBloc>().add(FetchPhotosEvent());
                 },
-                child: ListView.builder(
-                  itemCount: state.loadedPhotos.length,
-                  itemBuilder: (context, index) {
-                    final group = state.loadedPhotos[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Назва групи (літера) з фіксованою шириною
-                          Container(
-                            width: 50, // Ширина для літери
-                            alignment: Alignment.topCenter,
-                            child: Text(
-                              group.key, // Літера групи
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 15),
+                  child: Scrollbar(
+                    child: ListView.builder(
+                      itemCount: state.loadedPhotos.length,
+                      itemBuilder: (context, index) {
+                        final group = state.loadedPhotos[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Назва групи (літера) з фіксованою шириною
+                              Container(
+                                width: 30, // Ширина для літери
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  group.key, // Літера групи
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF0061A6)),
+                                ),
                               ),
-                            ),
+                              // Список фотографій у групі
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 10,
+                                  children: group.value
+                                      .map(
+                                        (photo) => ListTile(
+                                          contentPadding: EdgeInsets.all(10),
+                                          title: Text(photo.photographer),
+                                          subtitle: Text(photo.alt),
+                                          leading: Image.network(photo.url),
+                                          shape: OutlineInputBorder(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                    Radius.circular(10.0)),
+                                            borderSide: BorderSide(
+                                              color: Color(0xFF535F70),
+                                              width: 1.0, // Товщина обведення
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                            ],
                           ),
-                          // Список фотографій у групі
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: group.value
-                                  .map(
-                                    (photo) => ListTile(
-                                      contentPadding: EdgeInsets.all(10),
-                                      title: Text(photo.photographer),
-                                      subtitle: Text(photo.alt),
-                                      leading: Image.network(photo.url),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               );
             } else if (state is HomeSearchingState) {
               if (state.searchedPhotos.isEmpty) {
                 // Якщо список порожній, відображаємо повідомлення
-                return Center(
-                  child: Text(
-                    'Жодних даних не було знайдено',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
+                return Column(
+                  children: [
+                    Divider(
+                      color: Colors.black,
+                      thickness: 1.0, // Товщина лінії
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 50.0),
+                        child: Text(
+                          'No item found',
+                          style:
+                              TextStyle(fontSize: 24, color: Color(0xFF535F70)),
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               } else {
                 // Якщо список не порожній, відображаємо його
-                return ListView.builder(
-                  itemCount: state.searchedPhotos.length,
-                  itemBuilder: (context, index) {
-                    final photo = state.searchedPhotos[index];
-                    return ListTile(
-                      contentPadding: EdgeInsets.all(10),
-                      title: Text(photo.photographer),
-                      subtitle: Text(photo.alt),
-                      leading: Image.network(photo.url),
-                    );
-                  },
+                return Column(
+                  children: [
+                    Divider(
+                      color: Colors.black,
+                      thickness: 1.0, // Товщина лінії
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: state.searchedPhotos.length,
+                        itemBuilder: (context, index) {
+                          final photo = state.searchedPhotos[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 20.0),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.all(10),
+                              title: Text(photo.photographer),
+                              subtitle: Text(photo.alt),
+                              leading: Image.network(photo.url),
+                              shape: OutlineInputBorder(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10.0)),
+                                borderSide: BorderSide(
+                                  color: Color(0xFF535F70),
+                                  width: 1.0, // Товщина обведення
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 );
               }
             } else if (state is HomeEmptyState) {
               return Center(
                 child: Text(
                   'Жодних даних не було отримано',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  style: TextStyle(fontSize: 18),
                 ),
               );
             } else if (state is HomeErrorState) {

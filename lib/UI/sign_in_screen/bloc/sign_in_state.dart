@@ -14,6 +14,10 @@ class PasswordValid extends SignInState {}
 
 class PasswordInvalid extends SignInState {}
 
+class EmailResetError extends SignInState {}
+
+class PasswordResetError extends SignInState {}
+
 class SignInSuccess extends SignInState {
   final Map<String, dynamic> userData;
 
