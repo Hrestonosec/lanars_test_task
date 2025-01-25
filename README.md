@@ -133,12 +133,18 @@ Then you can run it on your device or emulator.
 
 ![image](https://github.com/user-attachments/assets/fa83d595-1311-4313-9892-a82c8ad2db44)
 
-Start searching only when > symbols
+Start searching only when symbols > 2
+
 ![image](https://github.com/user-attachments/assets/86bd658d-df8c-4e90-8569-852812f67155)
 
 ![image](https://github.com/user-attachments/assets/db91b8d8-157e-436e-8be4-eba0288f3eca)
 
 ![image](https://github.com/user-attachments/assets/cb955bbe-8f9d-4536-b8cc-f2386f3dd0a5)
+
+What would I change after analyzing what I did?
+
+On the HomeScreen, I would try to split the screen into two or more different widgets for different states (LoadState and SearchingState), because the code on the HomeScreen is currently hard to read.
+On the SignInScreen, I would have added some tips for users regarding email and password format (but this was not represent in the design and requirements).
 
 
 
